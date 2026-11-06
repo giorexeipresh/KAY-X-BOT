@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KAY X BOT - Deploy your WhatsApp bot</title>
+<meta name="theme-color" content="#07030f">
+<style>
+  :root { --bg:#07030f; --bg2:#0e0820; --card:#130b26; --line:#2d1a52; --text:#efe9fb; --mute:#9d8fc0; --p1:#7c3aed; --p2:#a855f7; --p3:#c4b5fd; --glow:rgba(139,92,246,.35); --ok:#34d399; --bad:#f87171; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:70px; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; padding-bottom:84px; }
+  body:before { content:""; position:fixed; inset:0; z-index:-1; background:radial-gradient(900px 500px at 50% -80px,#2a1060 0%,transparent 70%),radial-gradient(600px 400px at 100% 60%,rgba(124,58,237,.12),transparent 70%); }
+  .wrap { max-width:480px; margin:0 auto; padding:0 16px; }
+
+  /* top bar */
+  .top { position:sticky; top:0; z-index:20; background:rgba(7,3,15,.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .top .wrap { display:flex; align-items:center; justify-content:space-between; height:56px; }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.04em; }
+  .logo i { font-style:normal; width:32px; height:32px; display:grid; place-items:center; border-radius:9px; background:linear-gradient(135deg,var(--p1),var(--p2)); box-shadow:0 0 16px var(--glow); font-size:17px; }
+  .pill { border:1px solid var(--p1); color:var(--p3); background:rgba(124,58,237,.12); padding:7px 14px; border-radius:9px; font-size:14px; font-weight:600; text-decoration:none; }
+
+  /* hero */
+  .hero { text-align:center; padding:34px 0 8px; }
+  .tag { display:inline-block; font-size:12px; letter-spacing:.14em; color:var(--p3); border:1px solid var(--line); background:rgba(124,58,237,.1); padding:5px 12px; border-radius:99px; }
+  h1 { font-size:34px; line-height:1.15; margin:16px 0 10px; }
+  h1 span { background:linear-gradient(90deg,var(--p3),var(--p2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lead { color:var(--mute); margin:0 auto; max-width:380px; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:24px 0 8px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 6px; }
+  .stat b { display:block; font-size:24px; color:var(--p3); }
+  .stat small { color:var(--mute); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* cards */
+  .card { background:linear-gradient(180deg,var(--card),var(--bg2)); border:1px solid var(--line); border-radius:18px; padding:20px; margin:18px 0; box-shadow:0 0 40px rgba(124,58,237,.1); }
+  .card h2 { margin:0 0 4px; font-size:21px; }
+  .card h2 em { font-style:normal; color:var(--p2); }
+  .muted { color:var(--mute); font-size:14px; margin:0 0 14px; }
+  .step { display:none; } .step.on { display:block; }
+  .choice { display:flex; gap:14px; align-items:center; width:100%; text-align:left; margin:0 0 12px; padding:16px; color:var(--text); background:#0a0618; border:1px solid var(--line); border-radius:13px; cursor:pointer; font:inherit; transition:.15s; }
+  .choice:hover,.choice:focus { border-color:var(--p2); box-shadow:0 0 18px var(--glow); outline:none; }
+  .choice .ic { font-size:28px; }
+  .choice b { display:block; font-size:17px; }
+  .choice small { color:var(--mute); font-size:13px; }
+  label { display:block; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); margin-bottom:6px; }
+  input { width:100%; padding:14px; font-size:18px; color:var(--text); background:#0a0618; border:1px solid var(--line); border-radius:11px; outline:none; }
+  input:focus { border-color:var(--p2); }
+  .hint { font-size:13px; color:var(--mute); margin:6px 0 14px; }
+  .go { width:100%; padding:14px; font-size:17px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--p1),var(--p2)); border:0; border-radius:11px; cursor:pointer; box-shadow:0 6px 22px rgba(124,58,237,.4); }
+  .go:disabled { opacity:.55; cursor:wait; }
+  .back { background:none; border:0; color:var(--mute); cursor:pointer; font-size:14px; padding:0 0 12px; }
+  .out { margin-top:18px; display:none; text-align:center; }
+  .code { font:700 36px/1.2 ui-monospace,Menlo,Consolas,monospace; letter-spacing:.12em; color:var(--p3); background:#0a0618; border:1px dashed var(--p2); border-radius:12px; padding:16px 8px; margin:10px 0; user-select:all; box-shadow:0 0 24px var(--glow); }
+  .qr { display:block; margin:10px auto; width:260px; max-width:100%; background:#fff; border-radius:12px; padding:6px; }
+  ol { text-align:left; color:var(--mute); padding-left:20px; margin:12px 0 0; font-size:14px; }
+  .msg { padding:10px 12px; border-radius:10px; font-size:15px; }
+  .ok { background:rgba(52,211,153,.12); color:var(--ok); } .bad { background:rgba(248,113,113,.12); color:var(--bad); }
+
+  /* live */
+  .live { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .big { background:linear-gradient(135deg,#2a1060,#150a33); border:1px solid var(--line); border-radius:16px; padding:18px; }
+  .big b { display:block; font-size:38px; line-height:1.1; }
+  .big small { color:var(--mute); }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--ok); margin-right:6px; box-shadow:0 0 8px var(--ok); }
+
+  /* features */
+  .sect { text-align:center; margin:34px 0 4px; }
+  .sect small { color:var(--p2); letter-spacing:.16em; font-size:12px; }
+  .sect h2 { margin:4px 0 0; font-size:24px; }
+  .feat { overflow:hidden; padding:0; }
+  .art { height:130px; display:grid; place-items:center; font-size:54px; position:relative; background:radial-gradient(circle at 30% 20%,rgba(168,85,247,.35),transparent 60%),linear-gradient(135deg,#1c0d3d,#0b0618); }
+  .art:after { content:"✦"; position:absolute; top:12px; left:18px; color:var(--p3); opacity:.7; font-size:16px; }
+  .feat .txt { padding:16px 18px 18px; text-align:center; }
+  .feat h3 { margin:0 0 4px; font-size:18px; }
+  .feat p { margin:0; color:var(--mute); font-size:14px; }
+  .steps { counter-reset:s; list-style:none; padding:0; margin:0; }
+  .steps li { counter-increment:s; display:flex; gap:12px; align-items:flex-start; padding:10px 0; color:var(--text); font-size:15px; }
+  .steps li:before { content:counter(s); flex:none; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--p1),var(--p2)); display:grid; place-items:center; font-weight:700; font-size:14px; }
+  footer { text-align:center; color:var(--mute); font-size:13px; margin:26px 0; }
+  footer .jin { color:var(--p3); letter-spacing:.2em; }
+
+  /* bottom bar */
+  .bar { position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(10,5,22,.95); backdrop-filter:blur(10px); border-top:1px solid var(--line); }
+  .bar .wrap { display:flex; justify-content:space-around; padding:8px 4px 10px; }
+  .bar a { color:var(--mute); text-decoration:none; font-size:11px; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:64px; }
+  .bar a span { font-size:20px; }
+  .bar a:hover, .bar a:focus { color:var(--p3); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="logo"><i>⚔️</i> KAY X BOT</div>
+  <a class="pill" href="#deploy" data-go="deploy">Deploy</a>
+</div></header>
+
+<main class="wrap">
+  <section class="hero" id="home">
+    <span class="tag">影 SHADOW MONARCH EDITION</span>
+    <h1>Deploy <span>KAY X BOT</span><br>Free</h1>
+    <p class="lead">The free WhatsApp bot with a Shadow Monarch menu. Link it with a pairing code or a QR scan. No coding, no hosting, live in about a minute.</p>
+    <div class="stats">
+      <div class="stat"><b id="stLinked">–</b><small>Bots linked</small></div>
+      <div class="stat"><b id="stCmds">–</b><small>Commands</small></div>
+      <div class="stat"><b id="stFree">–</b><small>Free slots</small></div>
+    </div>
+  </section>
+
+  <section class="card" id="deploy">
+    <h2>Deploy <em>your bot</em></h2>
+    <p class="muted">Pick how you want to connect. Your bot is live in about a minute.</p>
+
+    <div id="s-choose" class="step on">
+      <button class="choice" id="pickCode"><span class="ic">🔢</span><span><b>Pairing code</b><small>Type your number, get an 8-character code. Easiest on one phone.</small></span></button>
+      <button class="choice" id="pickQr"><span class="ic">📷</span><span><b>QR code</b><small>Scan with WhatsApp from another phone or a computer screen.</small></span></button>
+    </div>
+
+    <div id="s-code" class="step">
+      <button class="back" data-back>← Back</button>
+      <label for="num">Phone number (with country code)</label>
+      <input id="num" inputmode="numeric" autocomplete="tel" placeholder="e.g. 2348012345678">
+      <div class="hint">Digits only. No + and no leading 0.</div>
+      <button class="go" id="go">⚡ Generate pairing code</button>
+      <div class="out" id="outCode"></div>
+    </div>
+
+    <div id="s-qr" class="step">
+      <button class="back" data-back>← Back</button>
+      <button class="go" id="goQr">📷 Show QR code</button>
+      <div class="hint">A QR cannot be scanned by the phone that shows it. Open this page on a computer or another phone.</div>
+      <div class="out" id="outQr"></div>
+    </div>
+  </section>
+
+  <section id="stats">
+    <div class="sect"><small>LIVE STATS</small><h2><span class="dot"></span>Right now</h2></div>
+    <div class="card"><div class="live">
+      <div class="big"><b id="bigLinked">–</b><small>Bots linked</small></div>
+      <div class="big"><b id="bigOnline">–</b><small>Online now</small></div>
+    </div><p class="hint" style="margin:12px 0 0">Real numbers from this server. Updates every minute.</p></div>
+  </section>
+
+  <section id="features">
+    <div class="sect"><small>EVERYTHING IN ONE PLACE</small><h2>What KAY X BOT can do</h2></div>
+    <div class="card feat"><div class="art">🤖</div><div class="txt"><h3>Your own bot, free</h3><p>Pair your number and the bot runs on your WhatsApp. You are its owner.</p></div></div>
+    <div class="card feat"><div class="art">⚔️</div><div class="txt"><h3>Shadow Monarch menu</h3><p>A picture menu with 10 categories and a fancy layout. Send <b>.menu</b> to see it.</p></div></div>
+    <div class="card feat"><div class="art">👥</div><div class="txt"><h3>Group management</h3><p>Kick, promote, tag everyone, lock the group, welcome messages and warnings.</p></div></div>
+    <div class="card feat"><div class="art">🛡️</div><div class="txt"><h3>Anti-link protection</h3><p>Deletes links in your groups, warns the sender, and removes repeat offenders.</p></div></div>
+    <div class="card feat"><div class="art">🎮</div><div class="txt"><h3>Games and tools</h3><p>Fun games, text tools, a calculator, passwords, countdowns and more. New commands are added often.</p></div></div>
+  </section>
+
+  <section class="card" id="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li>Choose pairing code or QR above.</li>
+      <li>In WhatsApp open Settings → Linked devices → Link a device.</li>
+      <li>Enter the code, or scan the QR from another device.</li>
+      <li>Send <b>.menu</b> in any chat. Shadows, arise!</li>
+    </ol>
+    <p class="hint" style="margin-top:14px">To unlink: WhatsApp → Linked devices → tap the device → Log out. The bot then deletes your login from this server.</p>
+  </section>
+
+  <footer><div class="jin">影 SHADOWS, ARISE 影</div>KAY X BOT<br>Created by <b>༄ᶦᶰᵈ᭄➢Iήsͥⱥnͣeͫ 🤨😈࿐ Godwin</b></footer>
+</main>
+
+<nav class="bar"><div class="wrap">
+  <a href="#home" data-go="home"><span>🏠</span>Home</a>
+  <a href="#deploy" data-go="deploy"><span>🚀</span>Deploy</a>
+  <a href="#stats" data-go="stats"><span>📊</span>Stats</a>
+  <a href="#features" data-go="features"><span>⚔️</span>Features</a>
+  <a href="#how" data-go="how"><span>❓</span>How</a>
+</div></nav>
+
+<script>
+  var poll = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function show(id) {
+    clearInterval(poll);
+    ["s-choose", "s-code", "s-qr"].forEach(function (s) { $(s).className = "step" + (s === id ? " on" : ""); });
+  }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function note(el, text, cls) {
+    clear(el); el.style.display = "block";
+    var d = document.createElement("div"); d.className = "msg " + cls; d.textContent = text; el.appendChild(d);
+  }
+  function steps(list) {
+    var ol = document.createElement("ol");
+    list.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ol.appendChild(li); });
+    return ol;
+  }
+
+  $("pickCode").addEventListener("click", function () { show("s-code"); });
+  $("pickQr").addEventListener("click", function () { show("s-qr"); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-back]"), function (b) {
+    b.addEventListener("click", function () { show("s-choose"); });
+  });
+
+  // ---------- pairing code ----------
+  function showCode(code) {
+    var out = $("outCode"); clear(out); out.style.display = "block";
+    var c = document.createElement("div"); c.className = "code";
+    c.textContent = code.length === 8 ? code.slice(0, 4) + "-" + code.slice(4) : code;
+    out.appendChild(c);
+    out.appendChild(steps(["Open WhatsApp on this phone", "Settings → Linked devices → Link a device", "Tap “Link with phone number instead”", "Type the code above"]));
+    var wait = document.createElement("div"); wait.className = "hint"; wait.textContent = "Waiting for you to enter the code…"; out.appendChild(wait);
+  }
+
+  function watch(number) {
+    clearInterval(poll);
+    var started = Date.now();
+    poll = setInterval(function () {
+      fetch("/api/status?number=" + encodeURIComponent(number)).then(function (r) { return r.json(); }).then(function (s) {
+        if (s.status === "online") { clearInterval(poll); note($("outCode"), "Connected! ✅ Open WhatsApp and send .menu to your own chat.", "ok"); }
+        else if (s.status === "none" || Date.now() - started > 190000) { clearInterval(poll); note($("outCode"), "The code expired. Tap the button to get a new one.", "bad"); }
+      }).catch(function () {});
+    }, 3000);
+  }
+
+  $("go").addEventListener("click", function () {
+    var go = $("go"), out = $("outCode");
+    var number = $("num").value.replace(/\D/g, "");
+    if (number.length < 8) { note(out, "Enter your full number with the country code.", "bad"); return; }
+    go.disabled = true; note(out, "Requesting a code from WhatsApp…", "ok");
+    fetch("/api/pair", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ number: number }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        go.disabled = false;
+        if (!res.ok) { note(out, res.j.error || "Something went wrong.", "bad"); return; }
+        if (res.j.status === "online") { note(out, "This number is already connected ✅", "ok"); return; }
+        if (res.j.status === "connecting") { note(out, "This number is already linked and reconnecting. Give it a minute.", "ok"); return; }
+        showCode(res.j.code); watch(number);
+      })
+      .catch(function () { go.disabled = false; note(out, "Could not reach the server.", "bad"); });
+  });
+
+  // ---------- QR ----------
+  var qrImg = null;
+  function showQr(src) {
+    var out = $("outQr");
+    if (!qrImg || !out.contains(qrImg)) {
+      clear(out); out.style.display = "block";
+      qrImg = document.createElement("img"); qrImg.className = "qr"; qrImg.alt = "WhatsApp QR code";
+      out.appendChild(qrImg);
+      out.appendChild(steps(["Open WhatsApp on another phone", "Settings → Linked devices → Link a device", "Point the camera at this code"]));
+    }
+    if (qrImg.src !== src) qrImg.src = src;
+  }
+
+  function watchQr(id) {
+    clearInterval(poll);
+    var started = Date.now();
+    poll = setInterval(function () {
+      fetch("/api/qr/poll?id=" + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (s) {
+        if (s.status === "qr") showQr(s.qr);
+        else if (s.status === "online") { clearInterval(poll); note($("outQr"), "Connected! ✅ Open WhatsApp and send .menu to your own chat.", "ok"); }
+        else if (s.status === "connecting") note($("outQr"), "Scanned! Finishing the connection…", "ok");
+        else if (s.status === "error") { clearInterval(poll); note($("outQr"), "Could not draw the QR. Try the pairing code option.", "bad"); }
+        else if (s.status === "expired" || Date.now() - started > 190000) { clearInterval(poll); note($("outQr"), "The QR expired. Tap the button for a new one.", "bad"); }
+      }).catch(function () {});
+    }, 2000);
+  }
+
+  $("goQr").addEventListener("click", function () {
+    var go = $("goQr"), out = $("outQr");
+    go.disabled = true; qrImg = null; note(out, "Getting a QR code from WhatsApp…", "ok");
+    fetch("/api/qr/start", { method: "POST" })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        go.disabled = false;
+        if (!res.ok) { note(out, res.j.error || "Something went wrong.", "bad"); return; }
+        watchQr(res.j.id);
+      })
+      .catch(function () { go.disabled = false; note(out, "Could not reach the server.", "bad"); });
+  });
+
+  // ---------- live stats (real numbers from this server) ----------
+  function loadStats() {
+    fetch("/api/stats").then(function (r) { return r.json(); }).then(function (s) {
+      $("stLinked").textContent = s.linked; $("stOnline").textContent = s.online;
+      $("stFree").textContent = s.free; $("stCmds").textContent = s.commands;
+      $("bigLinked").textContent = s.linked; $("bigOnline").textContent = s.online;
+    }).catch(function () {});
+  }
+  loadStats(); setInterval(loadStats, 60000);
+
+  // bottom bar: highlight + smooth scroll
+  Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      var el = document.getElementById(a.getAttribute("data-go"));
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+</script>
+</body>
+</html>
